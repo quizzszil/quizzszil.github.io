@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - Jaki kierunek technikum / LO jest dla Ciebie?</title>
+    <style>
+        body {font-family: system-ui, sans-serif; background: #0a0a1f; color: #e0e0ff; margin:0; padding:20px;}
+        .container {max-width: 760px; margin:0 auto;}
+        h1 {text-align:center; font-size:2.4rem;}
+        .subtitle {text-align:center; color:#94a3b8; margin-bottom:40px;}
+       
+        .question {background:#1a1a2e; padding:28px; margin:24px 0; border-radius:16px; border:1px solid #334155;}
+        .question__header {text-align:center; margin-bottom:20px;}
+        .question__header span {background:#6366f1; color:white; padding:4px 12px; border-radius:999px; font-size:0.95rem;}
+        .question h3 {margin:12px 0 0; font-size:1.35rem; color:#c4d0ff;}
+       
+        .quiz-input-wrapper {display:flex; align-items:center; gap:14px; padding:14px 18px; background:#111827; border-radius:12px; margin:10px 0;}
+        .quiz-input-wrapper:hover {background:#1e2937;}
+        input[type="radio"] {width:24px; height:24px; accent-color:#6366f1;}
+        label {flex:1; font-size:1.1rem; cursor:pointer;}
+       
+        button {display:block; margin:40px auto; padding:18px 56px; font-size:1.35rem; background:#6366f1; color:white; border:none; border-radius:999px; cursor:pointer;}
+        button:hover {background:#4f46e5; transform:scale(1.05);}
+        button:disabled {background:#475569;}
+       
+        #result {display:none; background:#1e293b; padding:32px; border-radius:16px; border:3px solid #6366f1; margin-top:40px;}
+        .score-item {display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #334155;}
+        .score-bar {height: 12px; background: #6366f1; border-radius: 999px; margin-top: 6px; max-width: 100%; overflow: hidden;
+}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Quiz rekrutacyjny</h1>
+    <p class="subtitle">32 pytania • wybierz kierunek, który najbardziej do Ciebie pasuje</p>
+    <div id="quiz"></div>
+    <button id="submitBtn" disabled>Sprawdź swój wynik</button>
+    <div id="result">
+        <h2 style="text-align:center;">Twój wynik</h2>
+        <div id="scores"></div>
+       
+        <h3 style="margin:32px 0 16px; text-align:center;">Najlepiej pasujące kierunki</h3>
+        <div id="recommendations" style="font-size:1.2rem; line-height:1.7;"></div>
+    </div>
+</div>
+<script>
+const questions = [
+    { q: "Lubię rozkręcać urządzenia i sprawdzać, jak działają w środku.", scores: {el:2, ele:1} },
+    { q: "Ciekawi mnie działanie instalacji elektrycznych w domu lub w budynkach.", scores: {el:2} },
+    { q: "Potrafię długo pracować nad naprawą sprzętu technicznego.", scores: {el:1, ele:2} },
+    { q: "Lubię pracę z narzędziami.", scores: {el:2} },
+    { q: "Interesuje mnie programowanie lub tworzenie stron internetowych.", scores: {inf:2} },
+    { q: "Lubię rozwiązywać problemy techniczne związane z komputerami.", scores: {inf:2} },
+    { q: "Spędzam dużo czasu przy komputerze ucząc się nowych technologii.", scores: {inf:2} },
+    { q: "Interesuje mnie bezpieczeństwo komputerów i sieci.", scores: {inf:2} },
+    { q: "Interesują mnie problemy związane z ochroną przyrody.", scores: {och:2} },
+    { q: "Lubię obserwować przyrodę i dowiadywać się, jak działają ekosystemy.", scores: {och:2} },
+    { q: "Zwracam uwagę na ekologiczne rozwiązania w życiu codziennym tj. segregacja śmieci.", scores: {och:2} },
+    { q: "Lubię zajęcia terenowe, np. wycieczki przyrodnicze lub badania w terenie.", scores: {och:2, tur:1} },
+    { q: "Interesuje mnie energia ze słońca, wiatru lub wody.", scores: {oze:2} },
+    { q: "Ciekawi mnie przyszłość energetyki i nowe technologie energetyczne.", scores: {oze:2} },
+    { q: "Lubię łączyć wiedzę techniczną z ekologią.", scores: {oze:2} },
+    { q: "Praca przy instalacjach technicznych w terenie byłaby dla mnie ciekawa.", scores: {oze:2} },
+    { q: "Lubię poznawać nowe miejsca i kultury.", scores: {tur:2} },
+    { q: "Sprawia mi przyjemność organizowanie wycieczek lub wydarzeń.", scores: {tur:2} },
+    { q: "Lubię opowiadać innym o ciekawych miejscach.", scores: {tur:2} },
+    { q: "Nauka języków obcych jest dla mnie interesująca.", scores: {tur:2} },
+    { q: "Chciałbym/chciałabym pomagać ludziom w dbaniu o zdrowie.", scores: {zdr:2} },
+    { q: "Lubię biologię i przedmioty związane z medycyną.", scores: {zdr:2} },
+    { q: "Nie mam problemu z widokiem krwi lub pracy medycznej.", scores: {zdr:2} },
+    { q: "Wyobrażam sobie pracę w zawodzie związanym ze zdrowiem lub opieką nad ludźmi.", scores: {zdr:2} },
+    { q: "Lubię tworzyć grafiki, plakaty lub projekty w komputerze.", scores: {pol:2} },
+    { q: "Lubię pracować w programach graficznych lub chciałbym/chciałabym się ich nauczyć.", scores: {pol:2} },
+    { q: "Mam cierpliwość do dokładnej pracy przy komputerze.", scores: {pol:2, inf:1} },
+    { q: "Interesuje mnie projektowanie okładek książek, plakatów lub materiałów reklamowych.", scores: {pol:2} },
+    { q: "Lubię lutować elementy i składać układy elektroniczne na płytkach.", scores: {ele:2, inf:1} },
+    { q: "Interesuje mnie świat mikrokontrolerów (Arduino, ESP32, Raspberry Pi).", scores: {ele:2, inf:1} },
+    { q: "Kiedy coś nie działa w urządzeniu elektronicznym (pilot, głośnik, ładowarka), lubię je rozkręcać i naprawiać.", scores: {ele:2, el:1} },
+    { q: "Chciałbym/chciałabym projektować własne urządzenia elektroniczne (alarmy, sterowniki, gadżety).", scores: {ele:2} }
+];
+const shuffledQuestions = questions.slice().sort(() => Math.random() - 0.5);
+const dimensionNames = {
+    el: "technik elektryk",
+    ele: "technik elektronik",
+    inf: "technik informatyk",
+    oze: "technik urządzeń i systemów energetyki odnawialnej",
+    och: "technik ochrony środowiska",
+    pol: "technik grafiki i poligrafii cyfrowej",
+    tur: "technik obsługi turystycznej",
+    zdr: "LO – oddział zdrowotny"
+};
+const quizContainer = document.getElementById("quiz");
+shuffledQuestions.forEach((q, i) => {
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `
+        <div class="question__header"><span>${i+1} / 32</span></div>
+        <h3>${q.q}</h3>
+        <div class="quiz-input-wrapper"><input type="radio" name="q${i}" value="0" id="q${i}_0"><label for="q${i}_0">Raczej nie</label></div>
+        <div class="quiz-input-wrapper"><input type="radio" name="q${i}" value="1" id="q${i}_1"><label for="q${i}_1">Średnio</label></div>
+        <div class="quiz-input-wrapper"><input type="radio" name="q${i}" value="2" id="q${i}_2"><label for="q${i}_2">Bardzo</label></div>
+    `;
+    quizContainer.appendChild(div);
+});
+document.querySelectorAll('input[type="radio"]').forEach(r => {
+    r.addEventListener('change', () => {
+        const answered = document.querySelectorAll('input:checked').length;
+        document.getElementById("submitBtn").disabled = answered < 32;
+    });
+});
+document.getElementById("submitBtn").addEventListener("click", () => {
+    const scores = {el:0, ele:0, inf:0, oze:0, och:0, pol:0, tur:0, zdr:0};
+    shuffledQuestions.forEach((q, i) => {
+        const val = parseInt(document.querySelector(`input[name="q${i}"]:checked`)?.value || 0);
+        Object.entries(q.scores).forEach(([key, weight]) => {
+            scores[key] += val * weight;
+        });
+    });
+    const maxScore = Math.max(...Object.values(scores));
+    let html = "";
+    Object.keys(scores).forEach(key => {
+        html += `
+            <div class="score-item">
+                <span><strong>${dimensionNames[key]}</strong></span>
+                <span>${scores[key]}</span>
+            </div>
+            <div class="score-bar" style="width:${maxScore > 0 ? (scores[key] / maxScore) * 100 : 0}%"></div>`;
+    });
+    const top3 = Object.entries(scores)
+        .sort((a,b) => b[1]-a[1])
+        .slice(0,3);
+    let rec = "<ul style='padding-left:20px;'>";
+    top3.forEach(([key]) => rec += `<li><strong>→ ${dimensionNames[key]}</strong></li>`);
+    rec += "</ul>";
+    document.getElementById("scores").innerHTML = html;
+    document.getElementById("recommendations").innerHTML = rec;
+    document.getElementById("result").style.display = "block";
+    document.getElementById("result").scrollIntoView({behavior:"smooth"});
+});
+</script>
+</body>
+</html>
