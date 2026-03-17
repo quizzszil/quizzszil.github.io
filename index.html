@@ -33,7 +33,7 @@
 <body>
 <div class="container">
     <h1>Quiz rekrutacyjny</h1>
-    <p class="subtitle">32 pytania • wybierz kierunek, który najbardziej do Ciebie pasuje</p>
+    <p class="subtitle">24 pytania • wybierz kierunek, który najbardziej do Ciebie pasuje</p>
     <div id="quiz"></div>
     <button id="submitBtn" disabled>Sprawdź swój wynik</button>
     <div id="result">
@@ -59,7 +59,7 @@ const questions = [
     // Ochrona środowiska (och)
     { q: "Interesują mnie problemy związane z ochroną przyrody.", scores: {och:2} },
     { q: "Lubię obserwować przyrodę i dowiadywać się, jak działają ekosystemy.", scores: {och:2} },
-    { q: "Zwracam uwagę na ekologiczne rozwiązania w życiu codziennym tj. segregacja śmieci.", scores: {och:2} },
+    { q: "Lubię zajęcia terenowe, np. wycieczki przyrodnicze lub badania w terenie.", scores: {och:2, tur:1} },
 
     // OZE
     { q: "Interesuje mnie energia ze słońca, wiatru lub wody.", scores: {oze:2} },
@@ -102,7 +102,7 @@ shuffledQuestions.forEach((q, i) => {
     const div = document.createElement("div");
     div.className = "question";
     div.innerHTML = `
-        <div class="question__header"><span>${i+1} / 32</span></div>
+        <div class="question__header"><span>${i+1} / 24</span></div>
         <h3>${q.q}</h3>
         <div class="quiz-input-wrapper"><input type="radio" name="q${i}" value="0" id="q${i}_0"><label for="q${i}_0">Raczej nie</label></div>
         <div class="quiz-input-wrapper"><input type="radio" name="q${i}" value="1" id="q${i}_1"><label for="q${i}_1">Średnio</label></div>
@@ -113,7 +113,7 @@ shuffledQuestions.forEach((q, i) => {
 document.querySelectorAll('input[type="radio"]').forEach(r => {
     r.addEventListener('change', () => {
         const answered = document.querySelectorAll('input:checked').length;
-        document.getElementById("submitBtn").disabled = answered < 32;
+        document.getElementById("submitBtn").disabled = answered < 24;
     });
 });
 document.getElementById("submitBtn").addEventListener("click", () => {
